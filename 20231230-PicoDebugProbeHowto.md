@@ -1,5 +1,10 @@
 # December 2023 Guide To Pico Debug Probe With Ubuntu 22.04 64 bits
 
+NB:
+
+- This document is now somewhat obsolete
+- As I am now using Ubuntu 24.04, I'll try to update it if if need to update the firmware of my debug probe
+
 ## Prerequisites
 
 - A Raspberry Pi Pico Debug Probe, cf. <https://www.raspberrypi.com/products/debug-probe/>
@@ -39,7 +44,8 @@ git clone https://github.com/raspberrypi/openocd
 cd openocd
 # Should be the defaut one
 git checkout rp2040-v0.12.0
-./configure
+./bootstrap
+./configure --enable-picoprobe
 make -j($nproc)
 sudo make install
 ```
@@ -47,7 +53,7 @@ sudo make install
 This assumes you have already installed a C compiling toolchain, this should be a good start:
 
 ```bash
-sudo apt install build-essential autoconf automake
+sudo apt install build-essential autoconf automake libtool pkg-config
 ```
 
 Make sure your user is part of `dialout` and `plugdev` groups, or only `root` will be able to launch OpenOCD.
@@ -72,47 +78,35 @@ sudo ln -s /usr/bin/nm /usr/local/bin/nm-multiarch
 sudo ln -s /usr/bin/objdump /usr/local/bin/objdump-multiarch
 ```
 
-
 ## VS Code
-
 
 For my example project for HAGL's Pico VGA board (<https://github.com/CHiPs44/hagl_pico_vgaboard>), a working `.vscode/launch.json` is:
 
 ```json
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "cwd": "${workspaceRoot}",
-            "executable": "./example/build/hagl_pico_vgaboard_example.elf",
-            "name": "Debug example with OpenOCD",
-            "request": "launch",
-            "type": "cortex-debug",
-            "servertype": "openocd",
-            "gdbPath": "gdb-multiarch",
-            "configFiles": [
-                "interface/cmsis-dap.cfg",
-                "target/rp2040.cfg"
-            ],
-            "searchDir": [
-                "/usr/local/share/openocd/scripts/"
-            ],
-            "showDevDebugOutput": "raw",
-            "openOCDLaunchCommands": [
-                "adapter speed 5000"
-            ],
-            "svdFile": "${env:PICO_SDK_PATH}/src/rp2040/hardware_regs/rp2040.svd",
-            "runToEntryPoint": "main",
-            "postRestartCommands": [
-                "break main",
-                "continue"
-            ],
-            "liveWatch": {
-                "enabled": true,
-                "samplesPerSecond": 4
-            }
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "cwd": "${workspaceRoot}",
+      "executable": "./example/build/hagl_pico_vgaboard_example.elf",
+      "name": "Debug example with OpenOCD",
+      "request": "launch",
+      "type": "cortex-debug",
+      "servertype": "openocd",
+      "gdbPath": "gdb-multiarch",
+      "configFiles": ["interface/cmsis-dap.cfg", "target/rp2040.cfg"],
+      "searchDir": ["/usr/local/share/openocd/scripts/"],
+      "showDevDebugOutput": "raw",
+      "openOCDLaunchCommands": ["adapter speed 5000"],
+      "svdFile": "${env:PICO_SDK_PATH}/src/rp2040/hardware_regs/rp2040.svd",
+      "runToEntryPoint": "main",
+      "postRestartCommands": ["break main", "continue"],
+      "liveWatch": {
+        "enabled": true,
+        "samplesPerSecond": 4
+      }
+    }
+  ]
 }
 ```
 
@@ -125,4 +119,3 @@ For `svdFile`, you must have a clone of Pico SDK, and `PICO_SDK_PATH` environmen
 It seems that installing **Cortex-Debug** extension from **marus25** is now sufficient to launch debugging with `F5`.
 
 `EOF`
-
