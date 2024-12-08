@@ -1,14 +1,11 @@
-# December 2023 Guide To Pico Debug Probe With Ubuntu 22.04 64 bits
+# December 2023/2024 Guide To Pico Debug Probe With Ubuntu 22.04/24.04
 
-NB:
-
-- This document is now somewhat obsolete
-- As I am now using Ubuntu 24.04, I'll try to update it if if need to update the firmware of my debug probe
+As of 2024-12, I am now using Ubuntu 24.04, and updated this document accordingly , it may not work on Ubuntu 22.04 anymore.
 
 ## Prerequisites
 
 - A Raspberry Pi Pico Debug Probe, cf. <https://www.raspberrypi.com/products/debug-probe/>
-- An Ubuntu 22.04 64 bits machine (x86-64 in my case)
+- An Ubuntu 24.04 64 bits machine (x86-64 in my case)
 
 ## Firmware setup
 
@@ -36,7 +33,22 @@ NB:
 
 ### OpenOCD
 
-It seems CMSIS-DAP support needs you to build Raspberry Pi's version of OpenOCD:
+This assumes you have already installed a C compiling toolchain, this should be a good start:
+
+```bash
+sudo apt install build-essential autoconf automake libtool pkg-config
+```
+
+NB: Ubuntu 24.04 has an openocd 0.12 package, and it seems Pico Debug Probe support is included:
+
+```text
+$ dpkg -L openocd | egrep "rp2040|pico"
+/usr/share/openocd/scripts/board/pico-debug.cfg
+/usr/share/openocd/scripts/target/rp2040-core0.cfg
+/usr/share/openocd/scripts/target/rp2040.cfg
+```
+
+However, it seems CMSIS-DAP support needs you to build Raspberry Pi's version of OpenOCD:
 
 ```bash
 cd ~/src
@@ -48,12 +60,6 @@ git checkout rp2040-v0.12.0
 ./configure --enable-picoprobe
 make -j($nproc)
 sudo make install
-```
-
-This assumes you have already installed a C compiling toolchain, this should be a good start:
-
-```bash
-sudo apt install build-essential autoconf automake libtool pkg-config
 ```
 
 Make sure your user is part of `dialout` and `plugdev` groups, or only `root` will be able to launch OpenOCD.
@@ -80,7 +86,7 @@ sudo ln -s /usr/bin/objdump /usr/local/bin/objdump-multiarch
 
 ## VS Code
 
-For my example project for HAGL's Pico VGA board (<https://github.com/CHiPs44/hagl_pico_vgaboard>), a working `.vscode/launch.json` is:
+For my example project for HAGL's Pico VGA board (<https://github.com/CHiPs44/hagl_pico_vgaboard_example>), a working `.vscode/launch.json` is:
 
 ```json
 {
@@ -95,7 +101,7 @@ For my example project for HAGL's Pico VGA board (<https://github.com/CHiPs44/ha
       "servertype": "openocd",
       "gdbPath": "gdb-multiarch",
       "configFiles": ["interface/cmsis-dap.cfg", "target/rp2040.cfg"],
-      "searchDir": ["/usr/local/share/openocd/scripts/"],
+      "searchDir": ["/usr/share/openocd/scripts/"],
       "showDevDebugOutput": "raw",
       "openOCDLaunchCommands": ["adapter speed 5000"],
       "svdFile": "${env:PICO_SDK_PATH}/src/rp2040/hardware_regs/rp2040.svd",
