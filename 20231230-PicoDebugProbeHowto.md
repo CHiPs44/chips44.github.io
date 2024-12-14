@@ -1,6 +1,6 @@
 # December 2023/2024 Guide To Pico Debug Probe With Ubuntu 22.04/24.04
 
-As of 2024-12, I am now using Ubuntu 24.04, and updated this document accordingly , it may not work on Ubuntu 22.04 anymore.
+As of 2024-12, I am now using Ubuntu 24.04, and updated this document accordingly, these instructions may not work on Ubuntu 22.04 anymore.
 
 ## Prerequisites
 
@@ -24,10 +24,10 @@ Install it on the probe in `bootsel` mode:
 - Drag `debugprobe.uf2` to `RPI-PI2`
 - Close probe lid
 
-NB:
+Please note tht:
 
-- `picoprobe.uf2` is intended for when you use a "real" Pico
-- Pico W is not compatible with `picoprobe.uf2`
+- ~~`picoprobe.uf2`~~ `debugprobe_on_pico.uf2` `debugprobe_on_pico2.uf2` are intended for when you use a "real" Pico or Pico 2
+- AFAIK, Pico W and Pico 2 W are not compatible
 
 ## Software installation
 
@@ -42,13 +42,16 @@ sudo apt install build-essential autoconf automake libtool pkg-config
 NB: Ubuntu 24.04 has an openocd 0.12 package, and it seems Pico Debug Probe support is included:
 
 ```text
-$ dpkg -L openocd | egrep "rp2040|pico"
+$ dpkg -L openocd | egrep "rp2040|rp2350|pico|cmsis-dap"
 /usr/share/openocd/scripts/board/pico-debug.cfg
+/usr/share/openocd/scripts/interface/cmsis-dap.cfg
 /usr/share/openocd/scripts/target/rp2040-core0.cfg
 /usr/share/openocd/scripts/target/rp2040.cfg
 ```
 
-However, it seems CMSIS-DAP support needs you to build Raspberry Pi's version of OpenOCD:
+Perhaps there sould be support for RP3250, too...
+
+`[Obsolete?]` However, it seems CMSIS-DAP support needs you to build Raspberry Pi's version of OpenOCD:
 
 ```bash
 cd ~/src
@@ -120,8 +123,10 @@ Parameter `executable` must be changed to path of the ELF file for your project 
 
 For `svdFile`, you must have a clone of Pico SDK, and `PICO_SDK_PATH` environment variable must point to it, but it's rather standard Pico stuff.
 
-### VS Code extension
+### VS Code extensions
 
 It seems that installing **Cortex-Debug** extension from **marus25** is now sufficient to launch debugging with `F5`.
+
+There is now an official Raspberry Pi Pico extension (<https://github.com/raspberrypi/pico-vscode>) which helps to setup **simple** projects, downloads up to date compilers, but does not yet handle seting project's name via a variable, for example.
 
 `EOF`
